@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,19 +7,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  id String @id @default(uuid())
-  username String @unique
-  email String @unique
+model User {
+  id       String    @id @default(uuid())
+  username String    @unique
+  email    String    @unique
   password String
-  tokens Token[]
+  comments Comment[]
+  tickets  Ticket[]
+  tokens   Token[]
 }
 
-model Token{
-  id String @id @default(uuid())
-  user User@relation(fields: [userId], references: [id])
-  userId String 
-  token String
+model Token {
+  id         String   @id @default(uuid())
+  userId     String
   created_at DateTime @default(now())
   expired_at DateTime
+  token      String
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Ticket {
+  ticket_id   String    @id @default(uuid())
+  subject     String
+  description String
+  created     DateTime  @default(now())
+  assignee_id String
+  assignee    User      @relation(fields: [assignee_id], references: [id])
+  comments    Comment[]
+}
+
+model Comment {
+  comment_id String @id @default(uuid())
+  content    String
+  user_id    String
+  ticket_id  String
+  c_type_id  Int
+  c_type     Ctype  @relation(fields: [c_type_id], references: [id])
+  ticket     Ticket @relation(fields: [ticket_id], references: [ticket_id])
+  user       User   @relation(fields: [user_id], references: [id])
+}
+
+model Ctype {
+  id          Int       @id @default(autoincrement())
+  description String
+  comments    Comment[]
 }

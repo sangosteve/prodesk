@@ -85,7 +85,7 @@ app.post("/login", async (req, res) => {
   res.status(200).json({
     message: "user logged in successfuly",
     token: token,
-    user: userExist.email,
+    user: userExist,
   });
 });
 
@@ -115,7 +115,7 @@ app.get("/protected", AuthenticatedUser, (req, res) => {
   res.status(200).json({ message: "welcome to protected" });
 });
 
-app.get("/refresh", async (req, res) => {
+app.post("/refresh", async (req, res) => {
   try {
     const refreshToken = req.cookies["refreshToken"];
     const payload = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
@@ -166,28 +166,107 @@ app.get("/logout", async (req, res) => {
   }
 });
 
+// TICKETS API
+app.get("/tickets", async (req, res) => {
+  try {
+    const tickets = await prisma.ticket.findMany({});
+    res.status(200).json(tickets);
+  } catch (e) {
+    res.json({ message: e.message });
+  }
+});
+
+app.post("/ticket", async (req, res) => {
+  try {
+    const ticket = await prisma.ticket.findFirst({
+      where: {
+        ticket_id: req.query.id,
+      },
+      include: {
+        comments: true,
+      },
+    });
+
+    res.status(200).json(ticket);
+  } catch (e) {
+    res.send({ message: e.message });
+  }
+});
+
+app.post("/ticket/new", async (req, res) => {
+  try {
+    const { subject, description, assignee_id } = req.body;
+    const newTicket = await prisma.ticket.create({
+      data: {
+        subject,
+        description,
+        assignee_id,
+      },
+    });
+
+    res
+      .status(200)
+      .json({ message: "ticket sent successfully", ticket: newTicket });
+  } catch (e) {
+    res.send({ message: e.message });
+  }
+});
+
+//USER ENDPOINT
+app.post("/user", async (req, res) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        id: req.query.id,
+      },
+      // include: {
+      //   comments: true,
+      // },
+    });
+
+    res.status(200).json(user);
+  } catch (e) {
+    res.send({ message: e.message });
+  }
+});
+
+//AGENTS ENDPOINT
+app.get("/agents", async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({});
+    res.status(200).json(users);
+  } catch (e) {
+    res.json({ message: e.message });
+  }
+});
+
+//COMMENT ENDPOINT
+
+app.post("/comment", async (req, res) => {
+  try {
+    console.log(req.body.content);
+    const comment = await prisma.comment.create({
+      data: {
+        content: req.body.content,
+        user_id: req.body.user_id,
+        ticket_id: req.body.ticket_id,
+        c_type_id: req.body.c_type_id,
+      },
+    });
+    res.status(200).send({ message: "comment sent successfully" });
+  } catch (e) {
+    console.log(e);
+    res.json({ message: e.message });
+  }
+});
+
+//COMMENT_TYPE END POINT
+app.get("/comment_types", async (req, res) => {
+  try {
+    const comment_types = await prisma.ctype.findMany({});
+    res.status(200).json(comment_types);
+  } catch (e) {
+    res.json({ message: e.message });
+  }
+});
 app.listen(3001, () => console.log("listening on port 3000"));
-
-// ROUTES
-// app.post("/", async (req, res) => {
-//   const { username, email, password } = req.body;
-
-//   const newUser = await prisma.user.create({
-//     data: {
-//       username,
-//       email,
-//       password,
-//     },
-//   });
-
-//   res.status(200).json(newUser);
-// });
-
-// app.get("/", async (req, res) => {
-//   const users = await prisma.user.findMany();
-//   res.status(200).json(users);
-// });
-
-// app.put("/", async (req, res) => {});
-
-// app.delete("/:id", async (req, res) => {});

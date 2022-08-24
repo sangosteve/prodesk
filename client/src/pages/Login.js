@@ -3,7 +3,7 @@ import { TextInput, Button, Group, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
-const Login = ({ setIsAuthenticated }) => {
+const Login = () => {
   const { auth, setAuth } = useContext(AuthContext);
   const form = useForm({
     initialValues: {
@@ -26,10 +26,6 @@ const Login = ({ setIsAuthenticated }) => {
       localStorage.setItem("user", JSON.stringify(user));
       setAuth(user);
     }
-    // localStorage.setItem("user", user);
-    //localStorage.removeItem("user");
-    //After login, send every request with token in the header
-    // axios.defaults.headers.common["Authorization"] = `Bearer ${data["token"]}`;
   };
 
   return (
@@ -54,6 +50,12 @@ const Login = ({ setIsAuthenticated }) => {
           <Button type="submit">Submit</Button>
         </Group>
       </form>
+      {/* <button
+        className="bg-blue-500 px-8 py-2 flex items-center text-white font-semibold"
+        onClick={submitForm}
+      >
+        Login
+      </button> */}
     </Box>
   );
 };

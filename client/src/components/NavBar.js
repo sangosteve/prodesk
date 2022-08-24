@@ -1,14 +1,10 @@
-import React, { useContext } from "react";
-import { AuthContext } from "../contexts/AuthContext";
+import React from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { FiMail, FiCalendar, FiBell, FiSearch } from "react-icons/fi";
 import { HiOutlineUserCircle } from "react-icons/hi";
+import ProfileImage from "./ProfileImage";
 
 const NavBar = () => {
-  const { auth, setAuth } = useContext(AuthContext);
-  const handleLogout = () => {
-    setAuth(null);
-    localStorage.removeItem("user");
-  };
   return (
     <div className="bg-white p-4 flex shadow-sm w-full">
       <div className="w-2/4 flex h-full">
@@ -31,10 +27,20 @@ const NavBar = () => {
         </div>
 
         <div className="w-6 h-6 flex items-center justify-center rounded-xl hover:cursor-pointer ">
+          {/* {user?.picture ? (
+            
+            <ProfileImage source={user.picture} />
+          ) : (
+            <HiOutlineUserCircle
+              size={24}
+              className="text-gray-400"
+              onClick={() => logout()}
+            />
+          )} */}
           <HiOutlineUserCircle
             size={24}
             className="text-gray-400"
-            onClick={handleLogout}
+            // onClick={() => logout()}
           />
         </div>
       </div>

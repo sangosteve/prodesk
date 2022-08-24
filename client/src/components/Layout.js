@@ -19,15 +19,6 @@ const Layout = ({ children }) => {
       <div className="w-full">
         <Navbar />
         {children}
-        {/* <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="tickets" element={<Tickets />}></Route>
-          <Route path="tickets/:id" element={<TicketViewPage />} />
-          <Route path="users" element={<Users />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="Login" element={<Login />} />
-        </Routes> */}
       </div>
     </div>
   );

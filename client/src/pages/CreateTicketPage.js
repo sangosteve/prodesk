@@ -1,30 +1,43 @@
-import React, { useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+
 import {
   Container,
-  Grid,
+  Box,
+  FormControl,
+  FormLabel,
   Select,
   Textarea,
   Button,
-  TextInput,
-} from "@mantine/core";
+  Text,
+  Input,
+} from "@chakra-ui/react";
 
 import { useForm } from "@mantine/form";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
 const CreateTicketPage = () => {
   const { auth } = useContext(AuthContext);
+  const [agents, setAgents] = useState([]);
+  const [ticketPriorities, setTicketPriorities] = useState([]);
+  const user = auth;
 
-  const user = JSON.parse(auth);
-  console.log("user_id:", user.id);
-  const form = useForm({
-    initialValues: {
-      contact: "",
-      subject: "",
-      description: "",
-      assignee_id: user.id,
-    },
+  const [values, setValues] = useState({
+    requester: "",
+    subject: "",
+    assignee_id: "",
+    priority_id: "",
+    description: "",
   });
-  const submitTicket = async (values) => {
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setValues({
+      ...values,
+      [event.target.name]: value,
+    });
+
+    // console.log(values);
+  };
+  const submitTicket = async () => {
     try {
       const response = await axios.post("ticket/new", values);
       console.log(response);
@@ -32,43 +45,112 @@ const CreateTicketPage = () => {
       console.error(e.message);
     }
   };
-  return (
-    <Container size="xs" px={0}>
-      <form onSubmit={form.onSubmit((values) => submitTicket(values))}>
-        <Grid gutter={8}>
-          <Grid.Col span={12}>
-            <Select
-              label="Contact"
-              placeholder="Pick one"
-              searchable
-              nothingFound="No options"
-              data={["React", "Angular", "Svelte", "Vue"]}
-              {...form.getInputProps("contact")}
-            />
-          </Grid.Col>
-          <Grid.Col span={12}>
-            <TextInput
-              type="text"
-              placeholder="Your name"
-              label="Subject"
-              required
-              {...form.getInputProps("subject")}
-            />
-          </Grid.Col>
-          <Grid.Col span={12}>
-            <Textarea
-              placeholder="Description"
-              label="description"
-              {...form.getInputProps("description")}
-              required
-            />
-          </Grid.Col>
 
-          <Grid.Col span={12}>
-            <Button type="submit">Save</Button>
-          </Grid.Col>
-        </Grid>
-      </form>
+  const getAgents = async () => {
+    const response = await axios.get("agents");
+    setAgents(response.data);
+  };
+
+  const getPriorities = async () => {
+    const response = await axios.get(`priorities`);
+    setTicketPriorities(response.data);
+  };
+
+  useEffect(() => {
+    getAgents();
+    getPriorities();
+  }, []);
+  return (
+    <Container>
+      <Box p={2}>
+        <FormControl>
+          <FormLabel>
+            <Text fontSize="sm">Requester</Text>
+          </FormLabel>
+          <Select
+            size="sm"
+            name="requester"
+            value={values.requester}
+            onChange={handleChange}
+          >
+            {agents.map((agent) => (
+              <option value={agent.id} key={agent.id}>
+                {agent.username}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+      <Box p={2}>
+        <FormControl>
+          <FormLabel>
+            <Text fontSize="sm">Subject</Text>
+          </FormLabel>
+          <Input
+            size="sm"
+            name="subject"
+            value={values.subject}
+            onChange={handleChange}
+          />
+        </FormControl>
+      </Box>
+      <Box p={2}>
+        <FormControl>
+          <FormLabel>
+            <Text fontSize="sm">Assignee</Text>
+          </FormLabel>
+          <Select
+            size="sm"
+            name="assignee_id"
+            value={values.assignee_id}
+            onChange={handleChange}
+          >
+            {agents.map((agent) => (
+              <option value={agent.id} key={agent.id}>
+                {agent.username}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+      <Box p={2}>
+        <FormControl>
+          <FormLabel>
+            <Text fontSize="sm">Ticket Priority</Text>
+          </FormLabel>
+          <Select
+            size="sm"
+            name="priority_id"
+            value={values.priority_id}
+            onChange={handleChange}
+          >
+            {ticketPriorities.map((priority) => (
+              <option value={priority.id} key={priority.id}>
+                {priority.description}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+      <Box p={2}>
+        <FormControl>
+          <FormLabel>
+            <Text fontSize="sm">Description</Text>
+          </FormLabel>
+          <Textarea
+            size="sm"
+            name="description"
+            placeholder="Here is a sample placeholder"
+            value={values.description}
+            onChange={handleChange}
+          />
+        </FormControl>
+      </Box>
+      <Box p={2}>
+        <Button colorScheme="blue" size="sm" onClick={submitTicket}>
+          Create Ticket
+        </Button>
+      </Box>
     </Container>
   );
 };

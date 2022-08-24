@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
+import { Select, Button } from "@chakra-ui/react";
 import {
   Container,
   Grid,
-  Select,
   Textarea,
   TextInput,
   Menu,
-  Button,
   Text,
+  NativeSelect,
 } from "@mantine/core";
+
 import {
   FiMoreVertical,
   FiCornerUpLeft,
@@ -28,9 +29,13 @@ const TicketViewPage = () => {
   const [commentText, setCommentText] = useState("");
   const [commentTypeId, setCommentTypeId] = useState("");
   const [ticketComments, setTicketComments] = useState([]);
+  const [ticketPriorities, setTicketPriorities] = useState([]);
+  const [priorityId, setPriorityId] = useState("");
+  const [requesterId, setRequesterId] = useState("");
   let { id } = useParams();
   const { auth } = useContext(AuthContext);
 
+  //console.log(auth);
   const getAgents = async () => {
     const response = await axios.get("agents");
     setAgents(response.data);
@@ -48,24 +53,41 @@ const TicketViewPage = () => {
     setCommentTypes(response.data);
   };
 
+  const getPriorities = async () => {
+    const response = await axios.get(`priorities`);
+    setTicketPriorities(response.data);
+  };
+
   const submitComment = async () => {
     const comment = {
       content: commentText,
-      user_id: JSON.parse(auth).id,
+      user_id: auth?.id,
       ticket_id: id,
       c_type_id: parseInt(commentTypeId),
     };
-    // // console.log(comment);
-    const response = await axios.post(`comment`, comment);
+    console.log(comment);
 
+    const response = await axios
+      .post(`comment`, comment)
+      .then(() => setCommentText(""));
+  };
+
+  const updateTicketDetails = async () => {
+    const response = await axios.put(`ticket/update?id=${id}`, {
+      assignee_id: requesterId,
+      priority_id: priorityId,
+    });
     console.log(response.data);
   };
+
   useEffect(() => {
     // console.log("auth", auth);
     getTicketDetails();
     getAgents();
     getCommentTypes();
+    getPriorities();
   }, [ticketComments]);
+
   return (
     <div className="w-full flex ">
       {/* {ticket.ticket_id} */}
@@ -80,36 +102,45 @@ const TicketViewPage = () => {
             />
           </Grid.Col>
           <Grid.Col span={12}>
-            {/* <Select
-              label="Assignee"
-              placeholder="Pick one"
-              searchable
-              nothingFound="No options"
-              data={agents.map((agent) => agent.username)}
-            /> */}
-            <select placeholder="Assignee">
+            <Select
+              placeholder="Select option"
+              size="sm"
+              onChange={(e) => {
+                setRequesterId(e.target.value);
+                //console.log(requesterId);
+              }}
+            >
               {agents.map((agent) => (
-                <option value={agent.id}>{agent.username}</option>
+                <option value={agent.id} key={agent.id}>
+                  {agent.username}
+                </option>
               ))}
-            </select>
+            </Select>
           </Grid.Col>
           <Grid.Col span={12}>
             <Select
-              label="Priority"
-              placeholder="Pick one"
-              searchable
-              nothingFound="No options"
-              data={["Medium", "Low", "High", "Normal"]}
-            />
+              placeholder="Select option"
+              size="sm"
+              onChange={(e) => {
+                setPriorityId(e.target.value);
+                // console.log(priorityId);
+              }}
+            >
+              {ticketPriorities.map((priority) => (
+                <option value={priority.id} key={priority.id}>
+                  {priority.description}
+                </option>
+              ))}
+            </Select>
           </Grid.Col>
           <Grid.Col span={12}>
-            <Select
-              label="Followers"
-              placeholder="Pick one"
-              searchable
-              nothingFound="No options"
-              data={agents.map((agent) => agent.username)}
-            />
+            <Button
+              width="full"
+              colorScheme="blue"
+              onClick={updateTicketDetails}
+            >
+              Update
+            </Button>
           </Grid.Col>
         </Grid>
       </div>
@@ -166,14 +197,13 @@ const TicketViewPage = () => {
         </div>
         {/* interaction/reply input box */}
         <div className="h-1/5 border border-gray-300 bg-white hover:border-blue-500 flex flex-col px-4">
-          <div className="py-4 flex">
+          <div className="py-2 flex">
             <button className="flex" onClick={submitComment}>
               <FiCornerUpLeft className="text-gray-400" />
               <small className="font-medium text-slate-900 ml-2">Reply</small>
             </button>
             <select
               onChange={(e) => {
-                console.log("select value:", e.target.value);
                 setCommentTypeId(e.target.value);
               }}
             >
@@ -185,6 +215,7 @@ const TicketViewPage = () => {
             </select>
           </div>
           <textarea
+            value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             className="h-full bg-transparent border-0 hover:border-0 focus:outline-none resize-none"
           ></textarea>

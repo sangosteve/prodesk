@@ -193,14 +193,37 @@ app.post("/ticket", async (req, res) => {
   }
 });
 
+app.put(`/ticket/update`, async (req, res) => {
+  try {
+    const { assignee_id, priority_id } = req.body;
+
+    const updateTicket = await prisma.ticket.update({
+      where: {
+        ticket_id: req.query.id,
+      },
+      data: {
+        assignee_id,
+        priority_id,
+      },
+    });
+
+    res.status(200).json(updateTicket);
+  } catch (e) {
+    res.send({ message: e.message });
+  }
+});
+
 app.post("/ticket/new", async (req, res) => {
   try {
-    const { subject, description, assignee_id } = req.body;
+    const { requester, subject, description, assignee_id, priority_id } =
+      req.body;
     const newTicket = await prisma.ticket.create({
       data: {
+        // requester,
         subject,
         description,
         assignee_id,
+        priority_id,
       },
     });
 
@@ -235,6 +258,16 @@ app.get("/agents", async (req, res) => {
   try {
     const users = await prisma.user.findMany({});
     res.status(200).json(users);
+  } catch (e) {
+    res.json({ message: e.message });
+  }
+});
+
+//PRIORITY ENDPOINT
+app.get("/priorities", async (req, res) => {
+  try {
+    const priorities = await prisma.priority.findMany({});
+    res.status(200).json(priorities);
   } catch (e) {
     res.json({ message: e.message });
   }

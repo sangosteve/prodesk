@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthContext } from "./contexts/AuthContext";
 import {
   Login,
   RegisterPage,
@@ -13,17 +12,9 @@ import {
 } from "./pages";
 import CreateTicketPage from "./pages/CreateTicketPage";
 import Protected from "./pages/Protected";
+import { AuthContext } from "./contexts/AuthContext";
 const Router = () => {
-  const { auth, setAuth } = useContext(AuthContext);
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem("user");
-    console.log("loggedInUser:", JSON.parse(loggedInUser));
-    if (loggedInUser) {
-      const foundUser = loggedInUser;
-      setAuth(foundUser);
-      // console.log("auth:", auth);
-    }
-  }, [auth]);
+  const { auth } = useContext(AuthContext);
   return (
     <>
       <Routes>

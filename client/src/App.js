@@ -1,13 +1,16 @@
 import { BrowserRouter } from "react-router-dom";
 import Router from "./Router";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ChakraProvider } from "@chakra-ui/react";
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Router />;
-      </BrowserRouter>
-    </AuthProvider>
+    <ChakraProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Router />
+        </BrowserRouter>
+      </AuthProvider>
+    </ChakraProvider>
   );
 }
 
